@@ -32,17 +32,19 @@ async def handle_language_selection(message: Message, state: FSMContext):
     user_id = message.from_user.id
     language = message.text.strip()
 
-    if language not in ["Русский", "English"]:
+    cleaned_language = language.replace("🇷🇺", "").replace("🇺🇸", "").strip()
+
+    if cleaned_language not in ["Русский", "English"]:
         await message.answer(
             "Пожалуйста, выберите язык из предложенных / Please select a language from the options.",
             reply_markup=language_keyboard
         )
-        logger.warning(f"Некорректный выбор языка от user_id {user_id}: {language}")
+        logger.warning(f"Некорректный выбор языка от user_id {user_id}: {language} (очищено: {cleaned_language})")
         return
 
-    db.set_language(user_id, language)
+    db.set_language(user_id, cleaned_language)
     
-    if language == "Русский":
+    if cleaned_language == "Русский":
         welcome_text = (
             "Привет! Я @DesignAssistantBot — эксперт по Human Design. "
             "Я могу ответить на вопросы о типах, центрах, профилях, авторитетах, воротах, линиях и каналах. "
@@ -59,4 +61,4 @@ async def handle_language_selection(message: Message, state: FSMContext):
     
     await message.answer(welcome_text)
     await state.set_state(HumanDesignStates.MAIN_CONVERSATION)
-    logger.info(f"Пользователь ID {user_id} выбрал язык: {language}")
+    logger.info(f"Пользователь ID {user_id} выбрал язык: {cleaned_language}")
