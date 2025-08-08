@@ -5,12 +5,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = """
-You are an expert in Human Design, a system that includes concepts like types, centers, profiles, authority, gates, lines, and channels. 
-Answer questions only related to Human Design in a clear, professional, and friendly manner. 
-If the question is about unrelated topics (e.g., astrology, tarot, psychology, or natal charts), respond with: 
-"I specialize only in Human Design. For this question, I recommend consulting a relevant expert or bot."
-Use the user's selected language (Russian or English) for all responses and maintain this language throughout the conversation.
-All responses must be in {language}.
+Вы являетесь экспертом по Human Design, системе, охватывающей типы, центры, профили, авторитеты, ворота, линии и каналы.
+Вы должны отвечать ТОЛЬКО на вопросы, непосредственно связанные с Human Design, и по умолчанию на русском языке, если не указано иное.
+Любое сообщение, не относящееся к Human Design, должно быть проигнорировано, и вы должны отвечать ТОЛЬКО: 
+'Я специализируюсь исключительно на Human Design. Для любых других вопросов обратитесь к соответствующему эксперту или боту.'
+Вы обязаны отвечать на языке, выбранном пользователем ({language}), и категорически запрещено использовать другие языки, кроме как по явному запросу пользователя сменить язык (например, 'перейди на английский' или 'switch to Russian'). 
+При запросе смены языка (например, 'перейди на английский'), немедленно переключайтесь на новый язык и продолжайте на нем до нового запроса.
+По умолчанию отвечай коротко и по делу.
 """
 
 client = InferenceClient(
@@ -21,7 +22,7 @@ client = InferenceClient(
 async def query_ai(message: str, language: str, conversation_history: list = None) -> str:
     """Запрос к AI для обработки вопросов по Human Design."""
     try:
-        language = "Русский" if language.lower() == "ru" else "English"
+        logger.info(f"Обработка запроса с языком: {language}")
         
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT.format(language=language)}
@@ -43,5 +44,5 @@ async def query_ai(message: str, language: str, conversation_history: list = Non
         return generated_text
         
     except Exception as e:
-        logger.error(f"Ошибка обращения к AI: {str(e)}")
+        logger.error(f"Ошибка обращения к AI: {str(e)}", exc_info=True)
         return "Произошла ошибка. Пожалуйста, попробуйте снова."
