@@ -20,6 +20,7 @@ class ChatHistory(Base):
     __tablename__ = "chat_history"
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    chat_name = Column(String, nullable=False)
     conversation = Column(Text, nullable=False)
     saved_at = Column(DateTime, default=datetime.utcnow)
 
@@ -68,14 +69,14 @@ class Database:
                 logger.error(f"Ошибка получения языка для user_id {user_id}: {str(e)}")
                 return "Русский"
 
-    def save_conversation(self, user_id: int, conversation: str):
-        """Сохранение истории чата."""
+    def save_conversation(self, user_id: int, chat_name: str, conversation: str):
+        """Сохранение истории чата с названием."""
         with self.Session() as session:
             try:
-                chat = ChatHistory(user_id=user_id, conversation=conversation)
+                chat = ChatHistory(user_id=user_id, chat_name=chat_name, conversation=conversation)
                 session.add(chat)
                 session.commit()
-                logger.info(f"История чата сохранена для user_id {user_id}")
+                logger.info(f"История чата '{chat_name}' сохранена для user_id {user_id}")
             except Exception as e:
                 logger.error(f"Ошибка сохранения истории чата для user_id {user_id}: {str(e)}")
                 session.rollback()

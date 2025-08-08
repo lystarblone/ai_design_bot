@@ -1,6 +1,6 @@
 import logging
 from aiogram import Router
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from models import Database
@@ -57,6 +57,6 @@ async def handle_language_selection(message: Message, state: FSMContext):
             "Ask your question right now, and I'll help you figure it out! 📚"
         )
     
-    await message.answer(welcome_text)
+    await message.answer(welcome_text, reply_markup=ReplyKeyboardRemove())
     await state.set_state(HumanDesignStates.MAIN_CONVERSATION)
     logger.info(f"Пользователь ID {user_id} выбрал язык: {cleaned_language}")
