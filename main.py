@@ -18,10 +18,10 @@ logger = logging.getLogger(__name__)
 async def on_startup(bot: Bot):
     """Инициализация команд бота."""
     commands = [
-        BotCommand(command="/start", description="Начать работу / Start the bot"),
-        BotCommand(command="/chat", description="Задать вопрос по Human Design / Ask about Human Design"),
-        BotCommand(command="/reset", description="Сбросить контекст / Reset context"),
-        BotCommand(command="/help", description="Показать справку / Show help")
+        BotCommand(command="/start", description="start"),
+        BotCommand(command="/chat", description="chat"),
+        BotCommand(command="/reset", description="reset"),
+        BotCommand(command="/help", description="help")
     ]
     await bot.set_my_commands(commands)
     logger.info("Команды бота успешно настроены")
