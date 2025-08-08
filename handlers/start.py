@@ -46,16 +46,15 @@ async def handle_language_selection(message: Message, state: FSMContext):
     
     if cleaned_language == "Русский":
         welcome_text = (
-            "✨Привет! Я @DesignAssistantBot — эксперт по Human Design.\n"
-            "Знаю все о типах, центрах, профилях, авторитетах, воротах и каналах.\n\n"
+            "✨Привет! Я — твой личный эксперт по Human Design.\n\n"
+            "Я создан, чтобы помочь тебе разобраться в уникальной системе самопознания, которая раскрывает твою истинную природу и жизненный путь. Я могу ответить на любой вопрос по Human Design, помочь расшифровать твою бодиграфию, дать практичные советы, как применять Human Design в повседневной жизни, чтобы жить в гармонии со своей энергией.\n\n"
             "Задавай свой вопрос прямо сейчас, и я помогу разобраться! 📚"
         )
     else:
         welcome_text = (
-            "Hi! I'm @DesignAssistantBot, a Human Design expert. "
-            "I can answer questions about types, centers, profiles, authority, gates, lines, and channels. "
-            "Ask away, and I'll help you understand! 😊\n\n"
-            "Use /chat to ask questions or /reset to clear context."
+            "✨Hello! I am your personal Human Design expert.\n\n"
+            "I was created to help you understand the unique system of self-discovery that reveals your true nature and life path. I can answer any question about Human Design, help you decipher your bodyography, and give you practical tips on how to apply Human Design in everyday life in order to live in harmony with your energy.\n\n"
+            "Ask your question right now, and I'll help you figure it out! 📚"
         )
     
     await message.answer(welcome_text)

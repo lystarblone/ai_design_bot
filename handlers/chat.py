@@ -27,7 +27,7 @@ async def cmd_chat(message: Message, state: FSMContext):
     await message.answer(response)
     logger.info(f"Пользователь ID {user_id} начал диалог с /chat")
 
-@router.message(HumanDesignStates.MAIN_CONVERSATION)
+@router.message(HumanDesignStates.MAIN_CONVERSATION, ~Command(commands=["start", "chat", "reset", "help"]))
 async def process_message(message: Message, state: FSMContext):
     user_id = message.from_user.id
     text = message.text.strip()
