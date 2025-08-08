@@ -81,12 +81,15 @@ class Database:
                 logger.error(f"Ошибка сохранения истории чата для user_id {user_id}: {str(e)}")
                 session.rollback()
 
-    def get_conversation(self, user_id: int) -> str:
-        """Получение последней сохраненной истории чата."""
+    def get_conversation(self, user_id: int, chat_name: str = None):
+        """Получение сохраненной истории чата."""
         with self.Session() as session:
             try:
-                chat = session.query(ChatHistory).filter_by(user_id=user_id).order_by(ChatHistory.saved_at.desc()).first()
-                return chat.conversation if chat else None
+                if chat_name:
+                    chat = session.query(ChatHistory).filter_by(user_id=user_id, chat_name=chat_name).first()
+                else:
+                    chat = session.query(ChatHistory).filter_by(user_id=user_id).order_by(ChatHistory.saved_at.desc()).first()
+                return chat if chat else None
             except Exception as e:
                 logger.error(f"Ошибка получения истории чата для user_id {user_id}: {str(e)}")
                 return None

@@ -7,6 +7,7 @@ from handlers.start import router as start_router
 from handlers.chat import router as chat_router
 from handlers.reset import router as reset_router
 from handlers.help import router as help_router
+from handlers.history import router as history_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -21,7 +22,8 @@ async def on_startup(bot: Bot):
         BotCommand(command="/start", description="start"),
         BotCommand(command="/chat", description="chat"),
         BotCommand(command="/reset", description="reset"),
-        BotCommand(command="/help", description="help")
+        BotCommand(command="/help", description="help"),
+        BotCommand(command="/history", description="history")
     ]
     await bot.set_my_commands(commands)
     logger.info("Команды бота успешно настроены")
@@ -32,6 +34,7 @@ async def main():
     
     dp.include_router(start_router)
     dp.include_router(chat_router)
+    dp.include_router(history_router)
     dp.include_router(reset_router)
     dp.include_router(help_router)
     

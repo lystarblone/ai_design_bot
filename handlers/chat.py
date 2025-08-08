@@ -27,7 +27,7 @@ async def cmd_chat(message: Message, state: FSMContext):
     await message.answer(response)
     logger.info(f"Пользователь ID {user_id} начал диалог с /chat")
 
-@router.message(HumanDesignStates.MAIN_CONVERSATION, ~Command(commands=["start", "chat", "reset", "help"]))
+@router.message(HumanDesignStates.MAIN_CONVERSATION, ~Command(commands=["start", "chat", "history", "reset", "help"]))
 async def process_message(message: Message, state: FSMContext):
     user_id = message.from_user.id
     text = message.text.strip()
@@ -41,8 +41,6 @@ async def process_message(message: Message, state: FSMContext):
         
         conversation_history.append({"role": "user", "content": text})
         conversation_history.append({"role": "assistant", "content": response})
-        if len(conversation_history) > 20:
-            conversation_history = conversation_history[-20:]
         await state.update_data(conversation_history=conversation_history)
         
         await message.answer(f"{response}")

@@ -59,9 +59,9 @@ async def process_save_confirmation(message: Message, state: FSMContext):
         await state.clear()
         await state.set_state(HumanDesignStates.MAIN_CONVERSATION)
         response = (
-            "Чат не сохранен. Контекст сброшен. 😊"
+            "Чат не сохранен. Контекст сброшен."
             if language == "Русский"
-            else "Chat not saved. Context reset. 😊"
+            else "Chat not saved. Context reset."
         )
         await message.answer(response, reply_markup=ReplyKeyboardRemove())
         logger.info(f"Контекст сброшен для user_id {user_id}, чат не сохранен")
@@ -88,15 +88,15 @@ async def process_chat_name(message: Message, state: FSMContext):
     if conversation_history:
         db.save_conversation(user_id, chat_name, json.dumps(conversation_history))
         response = (
-            f"Чат '{chat_name}' сохранен! Задай свой вопрос по Human Design! 😊"
+            f"Чат '{chat_name}' сохранен! Контекст сброшен. 😊"
             if language == "Русский"
-            else f"Chat '{chat_name}' saved! Ask your question about Human Design! 😊"
+            else f"Chat '{chat_name}' saved! Context reset 😊"
         )
     else:
         response = (
-            "История чата пуста, ничего не сохранено. Задай свой вопрос по Human Design! 😊"
+            "История чата пуста, ничего не сохранено. Задай свой вопрос! 😊"
             if language == "Русский"
-            else "Chat history is empty, nothing saved. Ask your question about Human Design! 😊"
+            else "Chat history is empty, nothing saved. Ask your question! 😊"
         )
 
     await state.clear()

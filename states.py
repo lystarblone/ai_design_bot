@@ -5,3 +5,4 @@ class HumanDesignStates(StatesGroup):
     MAIN_CONVERSATION = State()
     CONFIRM_SAVE_CHAT = State()
     NAME_CHAT = State()
+    SELECT_CHAT = State()
