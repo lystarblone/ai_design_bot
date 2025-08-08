@@ -47,21 +47,46 @@ async def process_save_confirmation(message: Message, state: FSMContext):
         return
 
     if choice in ["да", "yes"]:
-        response = (
-            "Пожалуйста, введите название для вашего чата."
-            if language == "Русский"
-            else "Please enter a name for your chat."
-        )
-        await state.set_state(HumanDesignStates.NAME_CHAT)
-        await message.answer(response, reply_markup=ReplyKeyboardRemove())
-        logger.info(f"Пользователь ID {user_id} подтвердил сохранение, ожидается ввод названия чата")
+        data = await state.get_data()
+        conversation_name = data.get("conversation_name")
+        conversation_history = data.get("conversation_history", [])
+        
+        if conversation_name:
+            if conversation_history:
+                db.update_conversation(user_id, conversation_name, json.dumps(conversation_history))
+                response = (
+                    f"Чат '{conversation_name}' дополнен! Задай свой вопрос по Human Design! 😊"
+                    if language == "Русский"
+                    else f"Chat '{conversation_name}' updated with new messages! Ask your question about Human Design! 😊"
+                )
+            else:
+                response = (
+                    "История чата пуста, ничего не сохранено. Задай свой вопрос по Human Design! 😊"
+                    if language == "Русский"
+                    else "Chat history is empty, nothing saved. Ask your question about Human Design! 😊"
+                )
+            await state.update_data(conversation_history=[])
+            await state.clear()
+            await state.set_state(HumanDesignStates.MAIN_CONVERSATION)
+            await message.answer(response, reply_markup=ReplyKeyboardRemove())
+            logger.info(f"Контекст сброшен для user_id {user_id}, чат '{conversation_name}' дополнен" if conversation_history else f"Контекст сброшен для user_id {user_id}, чат не сохранен (пустая история)")
+        else:
+            response = (
+                "Пожалуйста, введите название для вашего чата."
+                if language == "Русский"
+                else "Please enter a name for your chat."
+            )
+            await state.set_state(HumanDesignStates.NAME_CHAT)
+            await message.answer(response, reply_markup=ReplyKeyboardRemove())
+            logger.info(f"Пользователь ID {user_id} подтвердил сохранение, ожидается ввод названия чата")
     else:
+        await state.update_data(conversation_history=[])
         await state.clear()
         await state.set_state(HumanDesignStates.MAIN_CONVERSATION)
         response = (
-            "Чат не сохранен. Контекст сброшен."
+            "Чат не сохранен. Контекст сброшен. Задай свой вопрос по Human Design! 😊"
             if language == "Русский"
-            else "Chat not saved. Context reset."
+            else "Chat not saved. Context reset. Ask your question about Human Design! 😊"
         )
         await message.answer(response, reply_markup=ReplyKeyboardRemove())
         logger.info(f"Контекст сброшен для user_id {user_id}, чат не сохранен")
@@ -88,17 +113,18 @@ async def process_chat_name(message: Message, state: FSMContext):
     if conversation_history:
         db.save_conversation(user_id, chat_name, json.dumps(conversation_history))
         response = (
-            f"Чат '{chat_name}' сохранен! Контекст сброшен. 😊"
+            f"Чат '{chat_name}' сохранен! Задай свой вопрос по Human Design! 😊"
             if language == "Русский"
-            else f"Chat '{chat_name}' saved! Context reset 😊"
+            else f"Chat '{chat_name}' saved! Ask your question about Human Design! 😊"
         )
     else:
         response = (
-            "История чата пуста, ничего не сохранено. Задай свой вопрос! 😊"
+            "История чата пуста, ничего не сохранено. Задай свой вопрос по Human Design! 😊"
             if language == "Русский"
-            else "Chat history is empty, nothing saved. Ask your question! 😊"
+            else "Chat history is empty, nothing saved. Ask your question about Human Design! 😊"
         )
 
+    await state.update_data(conversation_history=[])
     await state.clear()
     await state.set_state(HumanDesignStates.MAIN_CONVERSATION)
     await message.answer(response, reply_markup=ReplyKeyboardRemove())

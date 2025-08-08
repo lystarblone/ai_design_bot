@@ -4,6 +4,7 @@ from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text, F
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from config import config
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +71,7 @@ class Database:
                 return "Русский"
 
     def save_conversation(self, user_id: int, chat_name: str, conversation: str):
-        """Сохранение истории чата с названием."""
+        """Сохранение нового чата."""
         with self.Session() as session:
             try:
                 chat = ChatHistory(user_id=user_id, chat_name=chat_name, conversation=conversation)
@@ -79,6 +80,25 @@ class Database:
                 logger.info(f"История чата '{chat_name}' сохранена для user_id {user_id}")
             except Exception as e:
                 logger.error(f"Ошибка сохранения истории чата для user_id {user_id}: {str(e)}")
+                session.rollback()
+
+    def update_conversation(self, user_id: int, chat_name: str, new_conversation: str):
+        """Дополнение существующего чата."""
+        with self.Session() as session:
+            try:
+                chat = session.query(ChatHistory).filter_by(user_id=user_id, chat_name=chat_name).first()
+                if chat:
+                    existing_history = json.loads(chat.conversation)
+                    new_history = json.loads(new_conversation)
+                    chat.conversation = json.dumps(existing_history + new_history)
+                    chat.saved_at = datetime.utcnow()
+                    session.commit()
+                    logger.info(f"История чата '{chat_name}' дополнена для user_id {user_id}")
+                else:
+                    logger.warning(f"Чат '{chat_name}' не найден для user_id {user_id}, создается новый")
+                    self.save_conversation(user_id, chat_name, new_conversation)
+            except Exception as e:
+                logger.error(f"Ошибка дополнения истории чата для user_id {user_id}: {str(e)}")
                 session.rollback()
 
     def get_conversation(self, user_id: int, chat_name: str = None):

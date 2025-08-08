@@ -75,7 +75,7 @@ async def process_chat_selection(message: Message, state: FSMContext):
                 return
 
             conversation_history = json.loads(chat.conversation)
-            await state.update_data(conversation_history=conversation_history)
+            await state.update_data(conversation_history=conversation_history, conversation_name=chat_name)
             await state.set_state(HumanDesignStates.MAIN_CONVERSATION)
             response = (
                 f"Чат '{chat.chat_name}' загружен! Задай свой вопрос по Human Design! 😊"
