@@ -45,10 +45,7 @@ async def process_message(message: Message, state: FSMContext):
             conversation_history = conversation_history[-20:]
         await state.update_data(conversation_history=conversation_history)
         
-        await message.answer(
-            f"{response}\n\n"
-            f"{'Продолжай диалог или сбрось контекст (/reset).' if language == 'Русский' else 'Continue the conversation or reset context (/reset).'}"
-        )
+        await message.answer(f"{response}")
         logger.info(f"Ответ для user_id {user_id}: {response[:100]}...")
         
         if any(phrase in text.lower() for phrase in ["пока", "до свидания", "bye", "goodbye"]):
