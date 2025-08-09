@@ -6,3 +6,5 @@ class HumanDesignStates(StatesGroup):
     CONFIRM_SAVE_CHAT = State()
     NAME_CHAT = State()
     SELECT_CHAT = State()
+    CHAT_ACTIONS = State()
+    RENAME_CHAT = State()

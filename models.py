@@ -71,9 +71,11 @@ class Database:
                 return "Русский"
 
     def save_conversation(self, user_id: int, chat_name: str, conversation: str):
-        """Сохранение нового чата."""
+        """Сохранение нового чата с проверкой уникальности названия."""
         with self.Session() as session:
             try:
+                if session.query(ChatHistory).filter_by(user_id=user_id, chat_name=chat_name).first():
+                    raise ValueError(f"Чат с названием '{chat_name}' уже существует")
                 chat = ChatHistory(user_id=user_id, chat_name=chat_name, conversation=conversation)
                 session.add(chat)
                 session.commit()
@@ -81,6 +83,7 @@ class Database:
             except Exception as e:
                 logger.error(f"Ошибка сохранения истории чата для user_id {user_id}: {str(e)}")
                 session.rollback()
+                raise
 
     def update_conversation(self, user_id: int, chat_name: str, new_conversation: str):
         """Дополнение существующего чата."""
@@ -100,6 +103,44 @@ class Database:
             except Exception as e:
                 logger.error(f"Ошибка дополнения истории чата для user_id {user_id}: {str(e)}")
                 session.rollback()
+                raise
+
+    def rename_conversation(self, user_id: int, old_name: str, new_name: str):
+        """Переименование чата с проверкой уникальности нового названия."""
+        with self.Session() as session:
+            try:
+                if session.query(ChatHistory).filter_by(user_id=user_id, chat_name=new_name).first():
+                    raise ValueError(f"Чат с названием '{new_name}' уже существует")
+                chat = session.query(ChatHistory).filter_by(user_id=user_id, chat_name=old_name).first()
+                if chat:
+                    chat.chat_name = new_name
+                    chat.saved_at = datetime.utcnow()
+                    session.commit()
+                    logger.info(f"Чат '{old_name}' переименован в '{new_name}' для user_id {user_id}")
+                else:
+                    logger.warning(f"Чат '{old_name}' не найден для user_id {user_id}")
+                    raise ValueError(f"Чат '{old_name}' не найден")
+            except Exception as e:
+                logger.error(f"Ошибка переименования чата для user_id {user_id}: {str(e)}")
+                session.rollback()
+                raise
+
+    def delete_conversation(self, user_id: int, chat_name: str):
+        """Удаление чата."""
+        with self.Session() as session:
+            try:
+                chat = session.query(ChatHistory).filter_by(user_id=user_id, chat_name=chat_name).first()
+                if chat:
+                    session.delete(chat)
+                    session.commit()
+                    logger.info(f"Чат '{chat_name}' удален для user_id {user_id}")
+                else:
+                    logger.warning(f"Чат '{chat_name}' не найден для user_id {user_id}")
+                    raise ValueError(f"Чат '{chat_name}' не найден")
+            except Exception as e:
+                logger.error(f"Ошибка удаления чата для user_id {user_id}: {str(e)}")
+                session.rollback()
+                raise
 
     def get_conversation(self, user_id: int, chat_name: str = None):
         """Получение сохраненной истории чата."""
