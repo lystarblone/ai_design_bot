@@ -15,23 +15,36 @@ async def cmd_help(message: Message):
     user_id = message.from_user.id
     language = db.get_language(user_id)
     
-    response = (
-        "📖 Я @DesignAssistantBot, эксперт по Human Design!\n"
-        "Доступные команды:\n"
-        "/start\n"
-        "/chat\n"
-        "/reset\n"
-        "/help\n\n"
-        "Я отвечаю только на вопросы по Human Design (типы, центры, профили, авторитеты, ворота, линии, каналы)."
-        if language == "Русский"
-        else
-        "📖 I'm @DesignAssistantBot, a Human Design expert!\n"
-        "Available commands:\n"
-        "/start\n"
-        "/chat\n"
-        "/reset\n"
-        "/help\n\n"
-        "I only answer questions about Human Design (types, centers, profiles, authority, gates, lines, channels)."
-    )
-    await message.answer(response)
-    logger.info(f"Пользователь ID {user_id} запросил справку")
+    if language == "Русский":
+        response = (
+            "📚 *Список команд бота:*\n\n"
+            "👋 */start* - Запустить бота и начать новый диалог.\n"
+            "💬 */chat* - Начать новый чат или продолжить текущий.\n"
+            "🔄 */reset* - Сбросить текущий контекст чата. Вы можете сохранить текущий чат перед сбросом.\n"
+            "📜 */history* - Просмотреть список сохранённых чатов. Выберите чат для открытия, переименования или удаления:\n"
+            "   - 🟢 *Открыть*: Загружает чат, и вы можете продолжить диалог.\n"
+            "   - ✏️ *Переименовать*: Запрашивает новое название для чата.\n"
+            "   - 🗑️ *Удалить*: Удаляет чат.\n"
+            "   - ⬅️ *Назад*: Возвращает к списку чатов.\n"
+            "   После переименования или удаления вы можете сразу продолжить диалог без вызова /chat.\n"
+            "🌐 *switch to English* - Переключиться на английский язык.\n"
+            "🌐 *switch to Русский* - Переключиться на русский язык."
+        )
+    else:
+        response = (
+            "📚 *List of bot commands:*\n\n"
+            "👋 */start* - Start the bot and begin a new conversation.\n"
+            "💬 */chat* - Start a new chat or continue the current one.\n"
+            "🔄 */reset* - Reset the current chat context. You can save the current chat before resetting.\n"
+            "📜 */history* - View the list of saved chats. Select a chat to open, rename, or delete:\n"
+            "   - 🟢 *Open*: Loads the chat, and you can continue the conversation.\n"
+            "   - ✏️ *Rename*: Prompts for a new chat name.\n"
+            "   - 🗑️ *Delete*: Deletes the chat.\n"
+            "   - ⬅️ *Back*: Returns to the chat list.\n"
+            "   After renaming or deleting, you can continue the conversation without calling /chat.\n"
+            "🌐 *switch to English* - Switch to English language.\n"
+            "🌐 *switch to Русский* - Switch to Russian language."
+        )
+    
+    await message.answer(response, parse_mode="Markdown")
+    logger.info(f"Пользователь ID {user_id} запросил справку (язык: {language})")

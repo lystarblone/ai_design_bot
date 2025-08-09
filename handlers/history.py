@@ -23,9 +23,9 @@ async def cmd_history(message: Message, state: FSMContext):
             chats = session.query(ChatHistory).filter_by(user_id=user_id).order_by(ChatHistory.saved_at.desc()).all()
             if not chats:
                 response = (
-                    "У вас нет сохраненных чатов. Начни новый диалог с /chat! 😊"
+                    "У вас нет сохраненных чатов. Начни новый диалог! 😊"
                     if language == "Русский"
-                    else "You have no saved chats. Start a new conversation with /chat! 😊"
+                    else "You have no saved chats. Start a new conversation! 😊"
                 )
                 await message.answer(response)
                 logger.info(f"Пользователь ID {user_id} запросил историю чатов, но она пуста")
@@ -65,9 +65,9 @@ async def process_chat_selection(callback: CallbackQuery, state: FSMContext):
             chat = session.query(ChatHistory).filter_by(user_id=user_id, chat_name=chat_name).first()
             if not chat:
                 response = (
-                    "Выбранный чат не найден. Попробуйте снова или начните новый диалог с /chat."
+                    "Выбранный чат не найден. Попробуйте снова или начните новый диалог."
                     if language == "Русский"
-                    else "Selected chat not found. Try again or start a new conversation with /chat."
+                    else "Selected chat not found. Try again or start a new conversation."
                 )
                 await callback.message.edit_text(response)
                 logger.warning(f"Пользователь ID {user_id} выбрал несуществующий чат: {chat_name}")
@@ -76,15 +76,15 @@ async def process_chat_selection(callback: CallbackQuery, state: FSMContext):
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(
                     text=f"🟢 Открыть" if language == "Русский" else "🟢 Open",
-                    callback_data=f"open_chat:{chat_name}"
+                    callback_data=f"open_chat:{chat.chat_name}"
                 )],
                 [InlineKeyboardButton(
                     text=f"✏️ Переименовать" if language == "Русский" else "✏️ Rename",
-                    callback_data=f"rename_chat:{chat_name}"
+                    callback_data=f"rename_chat:{chat.chat_name}"
                 )],
                 [InlineKeyboardButton(
                     text=f"🗑️ Удалить" if language == "Русский" else "🗑️ Delete",
-                    callback_data=f"delete_chat:{chat_name}"
+                    callback_data=f"delete_chat:{chat.chat_name}"
                 )],
                 [InlineKeyboardButton(
                     text=f"⬅️ Назад" if language == "Русский" else "⬅️ Back",
@@ -120,9 +120,9 @@ async def open_chat(callback: CallbackQuery, state: FSMContext):
             chat = session.query(ChatHistory).filter_by(user_id=user_id, chat_name=chat_name).first()
             if not chat:
                 response = (
-                    "Чат не найден. Попробуйте снова или начните новый диалог с /chat."
+                    "Чат не найден. Попробуйте снова или начните новый диалог."
                     if language == "Русский"
-                    else "Chat not found. Try again or start a new conversation with /chat."
+                    else "Chat not found. Try again or start a new conversation."
                 )
                 await callback.message.edit_text(response)
                 logger.warning(f"Пользователь ID {user_id} попытался открыть несуществующий чат: {chat_name}")
@@ -160,7 +160,7 @@ async def rename_chat(callback: CallbackQuery, state: FSMContext):
     )
     await state.set_state(HumanDesignStates.RENAME_CHAT)
     await state.update_data(old_chat_name=chat_name)
-    await callback.message.answer(response)
+    await callback.message.edit_text(response)
     logger.info(f"Пользователь ID {user_id} запросил переименование чата '{chat_name}'")
 
 @router.message(HumanDesignStates.RENAME_CHAT)
@@ -185,31 +185,13 @@ async def process_rename_chat(message: Message, state: FSMContext):
     try:
         db.rename_conversation(user_id, old_name, new_name)
         response = (
-            f"Чат успешно переименован из '{old_name}' в '{new_name}'! Выберите действие:"
+            f"Чат успешно переименован из '{old_name}' в '{new_name}'!"
             if language == "Русский"
-            else f"Chat successfully renamed from '{old_name}' to '{new_name}'! Select an action:"
+            else f"Chat successfully renamed from '{old_name}' to '{new_name}'!"
         )
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(
-                text=f"🟢 Открыть" if language == "Русский" else "🟢 Open",
-                callback_data=f"open_chat:{new_name}"
-            )],
-            [InlineKeyboardButton(
-                text=f"✏️ Переименовать" if language == "Русский" else "✏️ Rename",
-                callback_data=f"rename_chat:{new_name}"
-            )],
-            [InlineKeyboardButton(
-                text=f"🗑️ Удалить" if language == "Русский" else "🗑️ Delete",
-                callback_data=f"delete_chat:{new_name}"
-            )],
-            [InlineKeyboardButton(
-                text=f"⬅️ Назад" if language == "Русский" else "⬅️ Back",
-                callback_data="back_to_history"
-            )]
-        ])
-        await state.update_data(selected_chat_name=new_name)
-        await state.set_state(HumanDesignStates.CHAT_ACTIONS)
-        await message.answer(response, reply_markup=keyboard)
+        await state.clear()
+        await state.set_state(HumanDesignStates.MAIN_CONVERSATION)
+        await message.answer(response)
         logger.info(f"Пользователь ID {user_id} переименовал чат из '{old_name}' в '{new_name}'")
     except Exception as e:
         response = (
@@ -230,9 +212,9 @@ async def back_to_history(callback: CallbackQuery, state: FSMContext):
             chats = session.query(ChatHistory).filter_by(user_id=user_id).order_by(ChatHistory.saved_at.desc()).all()
             if not chats:
                 response = (
-                    "У вас нет сохраненных чатов. Начни новый диалог с /chat! 😊"
+                    "У вас нет сохраненных чатов. Начни новый диалог! 😊"
                     if language == "Русский"
-                    else "You have no saved chats. Start a new conversation with /chat! 😊"
+                    else "You have no saved chats. Start a new conversation! 😊"
                 )
                 await callback.message.edit_text(response)
                 logger.info(f"Пользователь ID {user_id} вернулся к истории чатов, но она пуста")
@@ -270,12 +252,13 @@ async def delete_chat(callback: CallbackQuery, state: FSMContext):
     try:
         db.delete_conversation(user_id, chat_name)
         response = (
-            f"Чат '{chat_name}' успешно удален! Начни новый диалог с /chat."
+            f"Чат '{chat_name}' успешно удален!"
             if language == "Русский"
-            else f"Chat '{chat_name}' successfully deleted! Start a new conversation with /chat."
+            else f"Chat '{chat_name}' successfully deleted!"
         )
-        await callback.message.edit_text(response)
         await state.clear()
+        await state.set_state(HumanDesignStates.MAIN_CONVERSATION)
+        await callback.message.edit_text(response)
         logger.info(f"Пользователь ID {user_id} удалил чат '{chat_name}'")
     except Exception as e:
         response = (
