@@ -25,10 +25,8 @@ async def cmd_help(message: Message):
             "   - 🟢 *Открыть*: Загружает чат, и вы можете продолжить диалог.\n"
             "   - ✏️ *Переименовать*: Запрашивает новое название для чата.\n"
             "   - 🗑️ *Удалить*: Удаляет чат.\n"
-            "   - ⬅️ *Назад*: Возвращает к списку чатов.\n"
-            "   После переименования или удаления вы можете сразу продолжить диалог без вызова /chat.\n"
-            "🌐 *switch to English* - Переключиться на английский язык.\n"
-            "🌐 *switch to Русский* - Переключиться на русский язык."
+            "   - ⬅️ *Назад*: Возвращает к списку чатов.\n\n"
+            "   После переименования или удаления вы можете сразу продолжить диалог без вызова /chat."
         )
     else:
         response = (
@@ -40,10 +38,8 @@ async def cmd_help(message: Message):
             "   - 🟢 *Open*: Loads the chat, and you can continue the conversation.\n"
             "   - ✏️ *Rename*: Prompts for a new chat name.\n"
             "   - 🗑️ *Delete*: Deletes the chat.\n"
-            "   - ⬅️ *Back*: Returns to the chat list.\n"
-            "   After renaming or deleting, you can continue the conversation without calling /chat.\n"
-            "🌐 *switch to English* - Switch to English language.\n"
-            "🌐 *switch to Русский* - Switch to Russian language."
+            "   - ⬅️ *Back*: Returns to the chat list.\n\n"
+            "   After renaming or deleting, you can continue the conversation without calling /chat."
         )
     
     await message.answer(response, parse_mode="Markdown")
