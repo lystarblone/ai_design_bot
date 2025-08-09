@@ -22,8 +22,8 @@ async def on_startup(bot: Bot):
         BotCommand(command="/start", description="start"),
         BotCommand(command="/chat", description="chat"),
         BotCommand(command="/reset", description="reset"),
-        BotCommand(command="/help", description="help"),
-        BotCommand(command="/history", description="history")
+        BotCommand(command="/history", description="history"),
+        BotCommand(command="/help", description="help")
     ]
     await bot.set_my_commands(commands)
     logger.info("Команды бота успешно настроены")

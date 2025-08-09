@@ -27,7 +27,7 @@ async def cmd_chat(message: Message, state: FSMContext):
     await message.answer(response)
     logger.info(f"Пользователь ID {user_id} начал диалог с /chat")
 
-@router.message(HumanDesignStates.MAIN_CONVERSATION, ~Command(commands=["start", "chat", "history", "reset", "help"]))
+@router.message(HumanDesignStates.MAIN_CONVERSATION, ~Command(commands=["start", "chat", "reset", "help", "history"]))
 async def process_message(message: Message, state: FSMContext):
     user_id = message.from_user.id
     text = message.text.strip()
@@ -43,8 +43,25 @@ async def process_message(message: Message, state: FSMContext):
         conversation_history.append({"role": "assistant", "content": response})
         await state.update_data(conversation_history=conversation_history)
         
-        await message.answer(f"{response}")
-        logger.info(f"Ответ для user_id {user_id}: {response[:100]}...")
+        max_message_length = 4096
+        if len(response) > max_message_length:
+            parts = []
+            current_part = ""
+            for paragraph in response.split("\n\n"):
+                if len(current_part) + len(paragraph) + 2 <= max_message_length:
+                    current_part += paragraph + "\n\n"
+                else:
+                    if current_part:
+                        parts.append(current_part.strip())
+                    current_part = paragraph + "\n\n"
+            if current_part:
+                parts.append(current_part.strip())
+        else:
+            parts = [response]
+        
+        for i, part in enumerate(parts, 1):
+            await message.answer(part)
+            logger.info(f"Отправлена часть {i}/{len(parts)} ответа для user_id {user_id}: {part[:100]}...")
         
         if any(phrase in text.lower() for phrase in ["пока", "до свидания", "bye", "goodbye"]):
             goodbye_message = "До встречи! 😊" if language == "Русский" else "See you later! 😊"
